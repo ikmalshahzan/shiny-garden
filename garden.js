@@ -347,38 +347,49 @@
   }
 
   const choices = form.querySelector('.rsvp-choices');
-  const letter = form.querySelector('.rsvp-details');
-  const note = form.querySelector('.rsvp-note');
+  const sleeve = form.querySelector('.envelope-letter-sleeve');
+  const letter = form.querySelector('.rsvp-letter');
+  const replyLabel = letter.querySelector('#rsvp-reply-label');
   const receipt = form.querySelector('.rsvp-receipt');
   const accept = choices.querySelector('[data-attendance="yes"]');
   const decline = choices.querySelector('[data-attendance="no"]');
   const nameField = form.elements.namedItem('name');
   const guestsField = form.elements.namedItem('guests');
+  const paxField = letter.querySelector('.pax-field');
   const invitationTitle = rsvp.querySelector('.rsvp-invitation-title');
   const confirmationTitle = rsvp.querySelector('.rsvp-confirmation-title');
   const status = form.querySelector('.form-status');
   const help = form.querySelector('.form-help');
   const storageKey = 'adani-ikmal-rsvp';
   const paperEase = 'cubic-bezier(.22, 1, .36, 1)';
+  let attendance;
+  let paperMotion;
 
   function showRsvpStep(step) {
     form.dataset.step = step;
     choices.hidden = step !== 'choices';
-    letter.hidden = step !== 'details';
-    letter.disabled = letter.hidden;
-    note.hidden = step !== 'note';
+    sleeve.hidden = step !== 'details' && step !== 'sealing';
+    letter.disabled = step !== 'details';
     const complete = step === 'complete';
     invitationTitle.hidden = complete;
     confirmationTitle.hidden = !complete;
-    help.hidden = step === 'note' || complete;
+    help.hidden = step === 'sealing' || complete;
     status.textContent = '';
   }
 
-  function liftLetter(element, delay) {
-    return element.animate(
-      [{ opacity: 0, transform: 'translateY(3.25rem) scale(.93)' }, { opacity: 1, transform: 'translateY(0) scale(1)' }],
-      { duration: 490, delay, fill: 'backwards', easing: paperEase }
-    );
+  function animateLetter(open) {
+    const style = getComputedStyle(letter);
+    const current = { opacity: Number(style.opacity), transform: style.transform };
+    const inside = { opacity: .85, transform: `translateY(${letter.offsetHeight}px) scale(.92)` };
+    const outside = { opacity: 1, transform: 'translateY(0) scale(1)' };
+    paperMotion?.cancel();
+    paperMotion = letter.animate(open ? [inside, outside] : [current, inside], {
+      duration: open ? 610 : 480,
+      delay: open ? 175 : 0,
+      fill: 'both',
+      easing: open ? paperEase : 'cubic-bezier(.45, 0, .65, 1)'
+    });
+    return paperMotion;
   }
 
   async function sealResponse(response) {
@@ -389,24 +400,12 @@
       return;
     }
 
-    const accepted = response.attendance === 'yes';
-    const message = accepted ? 'We’re so excited to celebrate with you!' : 'We appreciate your reply.';
-    if (canAnimateRsvp()) {
-      note.textContent = message;
-      showRsvpStep('note');
-      await liftLetter(note, accepted ? 40 : 180).finished.catch(() => {});
-      const tuck = note.animate(
-        [{ opacity: 1, transform: 'translateY(0) scale(1)' }, { opacity: 0, transform: 'translateY(3.25rem) scale(.86)' }],
-        { duration: 460, delay: 700, fill: 'forwards', easing: 'cubic-bezier(.45, 0, .65, 1)' }
-      );
-      await tuck.finished.catch(() => {});
-      showRsvpStep('complete');
-      tuck.cancel();
-      receipt.animate([{ opacity: 0 }, { opacity: 1 }], { duration: 360, delay: 180, fill: 'backwards', easing: paperEase });
-    } else {
-      showRsvpStep('complete');
-    }
-    receipt.textContent = message;
+    showRsvpStep('sealing');
+    if (canAnimateRsvp()) await animateLetter(false).finished.catch(() => {});
+    showRsvpStep('complete');
+    paperMotion?.cancel();
+    receipt.textContent = response.attendance === 'yes' ? 'We’re so excited to celebrate with you!' : 'We appreciate your reply.';
+    if (canAnimateRsvp()) receipt.animate([{ opacity: 0 }, { opacity: 1 }], { duration: 360, delay: 240, fill: 'backwards', easing: paperEase });
     receipt.focus({ preventScroll: true });
   }
 
@@ -421,19 +420,26 @@
     // Start at the choices when a saved response cannot be read.
   }
 
-  accept.disabled = false;
-  decline.disabled = false;
-  accept.addEventListener('click', (event) => {
-    showRsvpStep('details');
-    if (canAnimateRsvp()) liftLetter(letter, 175);
-    const focusTarget = event.detail !== 0 && matchMedia('(pointer: coarse)').matches ? letter : nameField;
-    focusTarget.focus({ preventScroll: true });
-  });
-  decline.addEventListener('click', () => sealResponse({ attendance: 'no' }));
+  for (const button of [accept, decline]) {
+    button.disabled = false;
+    button.addEventListener('click', (event) => {
+      attendance = button.dataset.attendance;
+      const accepted = attendance === 'yes';
+      replyLabel.textContent = accepted ? 'Accept RSVP' : 'Decline RSVP';
+      paxField.hidden = !accepted;
+      guestsField.disabled = !accepted;
+      showRsvpStep('details');
+      if (canAnimateRsvp()) animateLetter(true);
+      const focusTarget = event.detail !== 0 && matchMedia('(pointer: coarse)').matches ? letter : nameField;
+      focusTarget.focus({ preventScroll: true });
+    });
+  }
 
   form.querySelector('[data-rsvp-back]').addEventListener('click', () => {
     showRsvpStep('choices');
-    accept.focus({ preventScroll: true });
+    paperMotion?.cancel();
+    const previousChoice = attendance === 'yes' ? accept : decline;
+    previousChoice.focus({ preventScroll: true });
   });
 
   form.addEventListener('input', () => { status.textContent = ''; });
@@ -442,6 +448,8 @@
     if (form.dataset.step !== 'details') return;
     nameField.value = nameField.value.trim();
     if (!form.reportValidity()) return;
-    sealResponse({ attendance: 'yes', name: nameField.value, guests: guestsField.value });
+    const response = { attendance, name: nameField.value };
+    if (attendance === 'yes') response.guests = guestsField.value;
+    sealResponse(response);
   });
 })();

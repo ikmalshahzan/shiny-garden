@@ -4,8 +4,8 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <meta name="theme-color" content="#FAF8F5">
-  <meta name="description" content="Join Adani' and Ikmal for Petang Pertunangan on 25 December 2026.">
-  <title>Adani' &amp; Ikmal | Petang Pertunangan</title>
+  <meta name="description" content="Join 'Adani and Ikmal for Petang Pertunangan on 25 December 2026.">
+  <title>'Adani &amp; Ikmal | Petang Pertunangan</title>
   <link rel="icon" href="assets/monogram.svg" type="image/svg+xml">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -48,7 +48,7 @@
         <div class="walk-copy clearing-copy motion-layer">
           <img src="assets/monogram.svg" alt="" width="74" height="82">
           <p class="eyebrow">Together with their families</p>
-          <h1 id="invitation-title" tabindex="-1">Adani' <em>&amp;</em> Ikmal</h1>
+          <h1 id="invitation-title" tabindex="-1">'Adani <em>&amp;</em> Ikmal</h1>
         </div>
         <a class="walk-forward motion-layer" href="#details">Engagement details</a>
       </section>
@@ -114,37 +114,37 @@
 
     <section class="rsvp" id="rsvp" aria-labelledby="rsvp-title">
       <form class="rsvp-form" method="post" data-step="choices">
+        <h2 class="rsvp-heading" id="rsvp-title" tabindex="-1">
+          <span class="rsvp-invitation-title">Will you <em>join us?</em></span>
+          <span class="rsvp-confirmation-title" hidden>Thank <em>you!</em></span>
+        </h2>
         <div class="envelope-stage">
           <div class="rsvp-envelope">
             <div class="envelope-pocket" aria-hidden="true"></div>
             <div class="envelope-flap" aria-hidden="true"></div>
-            <div class="envelope-inscription">
-              <span class="envelope-seal" aria-hidden="true">
-                <img src="assets/monogram.svg" alt="" width="39" height="43" loading="lazy">
-              </span>
-              <h2 id="rsvp-title" tabindex="-1">
-                <span class="rsvp-invitation-title">Will you <em>join us?</em></span>
-                <span class="rsvp-confirmation-title" hidden>Thank <em>you!</em></span>
-              </h2>
+            <span class="envelope-seal" aria-hidden="true">
+              <img src="assets/monogram.svg" alt="" width="39" height="43" loading="lazy">
+            </span>
+            <div class="rsvp-choices" role="group" aria-label="Will you be attending?">
+              <button type="button" data-attendance="yes" disabled>Accept</button>
+              <button type="button" class="rsvp-decline" data-attendance="no" disabled>Decline</button>
             </div>
           </div>
-          <fieldset class="rsvp-letter rsvp-details" aria-label="RSVP details" tabindex="-1" hidden disabled>
-            <div class="field-row">
-              <label>Name<input name="name" autocomplete="name" required maxlength="120" placeholder="Your full name"></label>
-              <label>How many pax?<input name="guests" type="number" inputmode="numeric" min="1" step="1" value="1" required></label>
-            </div>
-            <div class="rsvp-actions">
-              <button type="submit">Confirm RSVP</button>
-              <button type="button" class="rsvp-text-action" data-rsvp-back>Back</button>
-            </div>
-          </fieldset>
-          <div class="rsvp-letter rsvp-note" hidden aria-hidden="true"></div>
+          <div class="envelope-letter-sleeve" hidden>
+            <fieldset class="rsvp-letter" aria-labelledby="rsvp-reply-label" tabindex="-1" disabled>
+              <p class="eyebrow" id="rsvp-reply-label">Accept RSVP</p>
+              <div class="field-row">
+                <label>Name<input name="name" autocomplete="name" required maxlength="120" placeholder="Your full name"></label>
+                <label class="pax-field">How many pax?<input name="guests" type="number" inputmode="numeric" min="1" step="1" value="1" required></label>
+              </div>
+              <div class="rsvp-actions">
+                <button type="submit">Confirm RSVP</button>
+                <button type="button" class="rsvp-text-action" data-rsvp-back>Back</button>
+              </div>
+            </fieldset>
+          </div>
         </div>
         <div class="rsvp-footer">
-          <div class="rsvp-choices" role="group" aria-label="Will you be attending?">
-            <button type="button" data-attendance="yes" disabled>Accept</button>
-            <button type="button" class="rsvp-decline" data-attendance="no" disabled>Decline</button>
-          </div>
           <p class="rsvp-receipt" role="status" tabindex="-1"></p>
           <p class="form-status" role="status"></p>
           <p class="form-help">Responses are saved on this device.</p>
