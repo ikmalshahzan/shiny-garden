@@ -65,7 +65,7 @@ function generateInviteLinks() {
       const code = existingCode || Utilities.getUuid().replace(/-/g, '').toLowerCase();
       const label = event === 'engagement' ? 'Engagement' : 'Wedding';
       const link = urls[event] ? urls[event] + '/?invite=' + code : '';
-      return { row: index + 2, code, label, status: status || 'Pending', link };
+      return { code, label, status: status || 'Pending', link };
     });
 
     sheet.getRange(2, 1, rowCount, 2).setValues(prepared.map(invite =>
