@@ -21,7 +21,7 @@ html.lenis, html.lenis body { height: auto; }
 .lenis.lenis-smooth { scroll-behavior: auto !important; }
 .lenis.lenis-stopped { overflow: clip; }
 
-.garden-backdrop { position: fixed; inset: 0; z-index: -1; overflow: hidden; pointer-events: none; }
+.garden-backdrop { position: fixed; inset: 0 0 auto; height: 100vh; height: 100lvh; z-index: -1; overflow: hidden; pointer-events: none; }
 .garden-backdrop img, .pollen, .threshold-art, .threshold-shade {
   position: absolute;
   inset: 0;
@@ -59,7 +59,8 @@ html.lenis, html.lenis body { height: auto; }
 }
 
 .garden { position: relative; isolation: isolate; }
-.has-motion .garden { height: 100vh; height: 100dvh; overflow: clip; }
+/* Keep the sticky stage stable while the browser toolbar moves. The art fills the expanded viewport. */
+.has-motion .garden { height: 100vh; height: 100svh; }
 .threshold-art {
   z-index: -1;
   height: 100vh;
@@ -69,11 +70,12 @@ html.lenis, html.lenis body { height: auto; }
   justify-items: center;
   overflow: clip;
 }
+.has-motion .threshold-art { height: 100vh; height: 100lvh; }
 .gate-camera {
   position: relative;
   height: 100%;
   width: max(100%, 145vh);
-  width: max(100%, 145dvh);
+  width: max(100%, 145lvh);
   transform-origin: 50% 49%;
 }
 .gate-camera img { position: absolute; inset: 0; width: 100%; height: 100%; max-width: none; object-fit: fill; }
@@ -89,12 +91,13 @@ html.lenis, html.lenis body { height: auto; }
   background: radial-gradient(ellipse at 50% 45%, transparent 26%, #10231958 78%, #102319b3 100%),
               linear-gradient(0deg, #102319c9, transparent 27%);
 }
-.has-motion .motion-layer { will-change: transform, opacity; }
+.has-motion :is(.landscape, .aisle-flowers, .gate-camera, .foreground),
+.has-motion .walk-panel:not(.is-outside-scene) .motion-layer { will-change: transform, opacity; }
 .garden-frame {
   position: absolute;
   inset: 13px 13px auto;
   height: calc(100vh - 26px);
-  height: calc(100dvh - 26px);
+  height: calc(100svh - 26px);
   z-index: 1;
   border: 1px solid #ddc29168;
   pointer-events: none;
@@ -114,7 +117,8 @@ html.lenis, html.lenis body { height: auto; }
   padding: clamp(1.5rem, 5vh, 3.5rem) 6vw max(1.85rem, env(safe-area-inset-bottom));
   text-align: center;
 }
-.has-motion .walk-panel { position: absolute; inset: 0; }
+.has-motion .walk-panel { position: absolute; inset: 0; min-height: 0; overflow: clip; }
+.has-motion .walk-panel.is-outside-scene { visibility: hidden; }
 .has-motion .chapter .motion-layer { opacity: 0; }
 .threshold-panel { min-height: 100vh; min-height: 100dvh; }
 .chapter { min-height: min(38rem, 84vh); min-height: min(38rem, 84dvh); }
@@ -190,11 +194,13 @@ html.lenis, html.lenis body { height: auto; }
   72% { opacity: .45; }
   100% { opacity: 0; transform: translate3d(var(--drift), -72px, 0); }
 }
-.is-past-gate .foreground img, .is-past-gate .threshold-panel .walk-forward::after { animation-play-state: paused; }
+.is-past-foliage .foreground, .is-past-gate .threshold-art { visibility: hidden; }
+.has-motion .garden.is-past-foliage .foreground, .has-motion .garden.is-past-gate .gate-camera { will-change: auto; }
+.is-past-foliage .foreground img, .is-outside-scene .walk-forward::after { animation-play-state: paused; }
 .garden-journey {
   position: relative;
   height: calc((1 + var(--walk-screens)) * 100vh);
-  height: calc(100dvh + var(--walk-screens) * 100svh);
+  height: calc((1 + var(--walk-screens)) * 100svh);
 }
 .garden-journey > .garden { position: sticky; top: 0; }
 
@@ -239,7 +245,7 @@ html.lenis, html.lenis body { height: auto; }
 .schedule time { color: #694a2e; font-size: .875rem; font-weight: 700; white-space: nowrap; }
 .schedule span { display: block; color: var(--sage); font: 600 clamp(1.22rem, 3.85vw, 1.65rem)/1.12 var(--heading); }
 .schedule small { display: block; margin-top: .2rem; color: var(--muted); font-size: .8125rem; line-height: 1.35; }
-.rsvp { min-height: 100vh; min-height: 100dvh; display: grid; align-content: center; padding: clamp(3.25rem, 10vh, 6rem) 6vw; }
+.rsvp { min-height: 100vh; min-height: 100svh; display: grid; align-content: center; padding: clamp(3.25rem, 10vh, 6rem) 6vw; }
 .rsvp-form {
   width: min(100%, 29.5rem);
   margin: auto;
@@ -404,12 +410,12 @@ html.lenis, html.lenis body { height: auto; }
 .form-status { color: var(--sage); font-weight: 700; }
 
 @media (min-width: 600px) {
-  .garden-frame { inset: 20px 22px auto; height: calc(100dvh - 40px); }
+  .garden-frame { inset: 20px 22px auto; height: calc(100svh - 40px); }
   .walk-panel { padding-bottom: 2.65rem; }
   .journey-progress { bottom: 22px; width: 90px; }
 }
 @media (min-width: 760px) {
-  .gate-camera { width: max(100%, 243.34vh); width: max(100%, 243.34dvh); }
+  .gate-camera { width: max(100%, 243.34vh); width: max(100%, 243.34lvh); }
   .foreground { width: 26%; }
   .threshold-title { font-size: clamp(3.7rem, 6.4vw, 5.5rem); }
   .event-date, .venue-address { margin: 1rem 0; }

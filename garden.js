@@ -8,6 +8,7 @@
   const rsvp = document.getElementById('rsvp');
   const motionPreference = matchMedia('(prefers-reduced-motion: reduce)');
   const compactViewport = matchMedia('(max-height: 480px)');
+  const touchInput = matchMedia('(any-pointer: coarse)');
   const walkScreens = 6.25;
   const threshold = { panel: panels[0], out: [.055, .18], active: [0, .13], arrive: 0 };
   const chapters = [
@@ -84,12 +85,16 @@
       const visible = progress >= open && progress <= close;
       const inactive = !visible;
       if (stage.panel.inert !== inactive) stage.panel.inert = inactive;
+      const outsideScene = progress <= (stage.in?.[0] ?? -1) ||
+        (!stage.remainingOpacity && progress >= stage.out[1]);
+      stage.panel.classList.toggle('is-outside-scene', outsideScene);
       if (visible) activeStage = stage;
       if (visible && pendingFocus === stage) {
         stage.panel.querySelector('h1, h2').focus({ preventScroll: true });
         pendingFocus = undefined;
       }
     }
+    garden.classList.toggle('is-past-foliage', progress >= .31);
     garden.classList.toggle('is-past-gate', progress >= .375);
   }
 
@@ -104,8 +109,9 @@
   function startGsap(gsap, ScrollTrigger, journey) {
     gsap.registerPlugin(ScrollTrigger);
     ScrollTrigger.config({ ignoreMobileResize: true });
-    // Lenis softens the wheel. Native touch already has momentum.
-    const lenis = window.Lenis ? new window.Lenis({ autoRaf: false, lerp: .12 }) : null;
+    // Native touch already supplies momentum. A second scrub tween makes the garden trail it.
+    const nativeTouch = touchInput.matches || ScrollTrigger.isTouch === 1;
+    const lenis = !nativeTouch && window.Lenis ? new window.Lenis({ autoRaf: false, lerp: .12 }) : null;
     const updateLenis = (seconds) => lenis.raf(seconds * 1000);
     if (lenis) {
       lenis.on('scroll', ScrollTrigger.update);
@@ -134,8 +140,8 @@
         trigger: journey,
         start: 'top top',
         end: () => '+=' + walkDistance(journey),
-        scrub: ScrollTrigger.isTouch === 1 ? .45 : .32,
-        fastScrollEnd: true
+        scrub: nativeTouch ? true : .32,
+        fastScrollEnd: !nativeTouch
       }
     });
 
@@ -272,7 +278,7 @@
     root.classList.toggle('has-motion', animated);
     if (!animated) {
       for (const panel of panels) panel.inert = false;
-      garden.classList.remove('is-past-gate');
+      garden.classList.remove('is-past-gate', 'is-past-foliage');
       if (previousView) {
         const top = window.scrollY + previousView.element.getBoundingClientRect().top + previousView.offset;
         window.scrollTo({ top, behavior: 'auto' });
@@ -301,7 +307,8 @@
   }
 
   const pollen = backdrop.querySelector('.pollen');
-  for (let index = 0; index < 18; index += 1) {
+  const particleCount = touchInput.matches ? 7 : 18;
+  for (let index = 0; index < particleCount; index += 1) {
     const particle = document.createElement('i');
     particle.style.setProperty('--x', (8 + (index * 17.7) % 85) + '%');
     particle.style.setProperty('--y', (18 + (index * 13.1) % 67) + '%');
