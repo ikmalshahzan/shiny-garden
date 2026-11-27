@@ -1,6 +1,7 @@
 'use client';
 
 import { useEffect, useLayoutEffect, useRef, useState } from 'react';
+import { preconnect } from 'react-dom';
 import { assetPath } from '../lib/assets';
 import { saveRsvp, rsvpEndpoint, previewRsvp } from '../lib/rsvp-client';
 
@@ -18,6 +19,7 @@ export default function RsvpEnvelope({ eventId }) {
   const [guests, setGuests] = useState('1');
   const [error, setError] = useState('');
   const [saving, setSaving] = useState(false);
+  const [paperSettled, setPaperSettled] = useState(false);
   const [ready, setReady] = useState(false);
   const section = useRef(null);
   const form = useRef(null);
@@ -76,21 +78,25 @@ export default function RsvpEnvelope({ eventId }) {
       focusTarget.focus({ preventScroll: true });
     }
     if (!canAnimate(paper)) {
-      if (!opening) setStep('complete');
+      if (!opening) setPaperSettled(true);
       return;
     }
 
     const tucked = { opacity: .85, transform: `translateY(${paper.offsetHeight}px) scale(.92)` };
     const exposed = { opacity: 1, transform: 'translateY(0) scale(1)' };
     const animation = paper.animate(opening ? [tucked, exposed] : [previousPaper.current ?? exposed, tucked], {
-      duration: opening ? 610 : 480,
+      duration: opening ? 610 : 360,
       delay: opening ? 175 : 0,
       fill: 'both',
       easing: opening ? paperEase : 'cubic-bezier(.45, 0, .65, 1)',
     });
-    if (!opening) animation.finished.then(() => setStep('complete'), () => {});
+    if (!opening) animation.finished.then(() => setPaperSettled(true), () => {});
     return () => animation.cancel();
   }, [step, accepted, detailsVisible]);
+
+  useEffect(() => {
+    if (step === 'sealing' && paperSettled && !saving) setStep('complete');
+  }, [step, paperSettled, saving]);
 
   useEffect(() => {
     if (!complete) return;
@@ -98,12 +104,13 @@ export default function RsvpEnvelope({ eventId }) {
     message.focus({ preventScroll: true });
     if (!canAnimate(message)) return;
     const animation = message.animate([{ opacity: 0 }, { opacity: 1 }], {
-      duration: 360, delay: 240, fill: 'backwards', easing: paperEase,
+      duration: 280, easing: paperEase,
     });
     return () => animation.cancel();
   }, [complete]);
 
   function choose(event, response) {
+    if (rsvpEndpoint) preconnect(rsvpEndpoint, { crossOrigin: 'anonymous' });
     setAttendance(response);
     setError('');
     focusFieldOnOpen.current = event.detail === 0 || !matchMedia('(pointer: coarse)').matches;
@@ -123,18 +130,21 @@ export default function RsvpEnvelope({ eventId }) {
     const reply = { eventId, attendance, name: replyName, guests: accepted ? Number(guests) : 0 };
     const controller = new AbortController();
     submission.current = controller;
+    const appearance = getComputedStyle(letter.current);
+    previousPaper.current = { opacity: Number(appearance.opacity), transform: appearance.transform };
+    setPaperSettled(false);
     setSaving(true);
     setError('');
+    setStep('sealing');
     try {
       if (rsvpEndpoint) await saveRsvp(reply, controller.signal);
       else if (previewRsvp) localStorage.setItem(storageKey, JSON.stringify(reply));
       else throw new Error('Online RSVP is not open yet.');
-      if (controller.signal.aborted) return;
-      const appearance = getComputedStyle(letter.current);
-      previousPaper.current = { opacity: Number(appearance.opacity), transform: appearance.transform };
-      setStep('sealing');
     } catch (failure) {
-      if (!controller.signal.aborted) setError(failure.message || 'Your reply could not be saved. Please try again.');
+      if (!controller.signal.aborted) {
+        setError(failure.message || 'Your reply could not be saved. Please try again.');
+        setStep('details');
+      }
     } finally {
       if (!controller.signal.aborted) setSaving(false);
       submission.current = null;
@@ -187,7 +197,7 @@ export default function RsvpEnvelope({ eventId }) {
           <p ref={receipt} className="rsvp-receipt" role="status" tabIndex={-1}>
             {complete && (accepted ? 'We’re so excited to celebrate with you!' : 'We appreciate your reply.')}
           </p>
-          <p className="form-status" role="status">{error}</p>
+          <p className="form-status" role="status">{saving ? 'Sending your reply…' : error}</p>
           {!rsvpEndpoint && step !== 'sealing' && !complete && <p className="form-help">
             {previewRsvp ? 'Preview only. Responses stay on this device.' : 'Online RSVP is not open yet.'}
           </p>}
