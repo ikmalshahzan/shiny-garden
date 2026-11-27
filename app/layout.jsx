@@ -1,5 +1,31 @@
 import './globals.css';
+import localFont from 'next/font/local';
 import { assetPath } from '../lib/assets';
+
+const heading = localFont({
+  src: [
+    { path: './fonts/cormorant.woff2', weight: '300 700', style: 'normal' },
+    { path: './fonts/cormorant-italic.woff2', weight: '300 700', style: 'italic' },
+  ],
+  display: 'swap',
+  adjustFontFallback: 'Times New Roman',
+  variable: '--font-garden-heading',
+});
+const body = localFont({
+  src: './fonts/plus-jakarta.woff2',
+  weight: '200 800',
+  display: 'swap',
+  preload: false,
+  variable: '--font-garden-body',
+});
+const arabic = localFont({
+  src: './fonts/amiri-arabic.woff2',
+  weight: '400',
+  display: 'swap',
+  preload: false,
+  adjustFontFallback: false,
+  variable: '--font-garden-arabic',
+});
 
 export const metadata = {
   title: "'Adani & Ikmal | Petang Pertunangan",
@@ -12,12 +38,7 @@ export const viewport = { themeColor: '#FAF8F5' };
 
 export default function RootLayout({ children }) {
   return (
-    <html lang="en">
-      <head>
-        <link rel="preconnect" href="https://fonts.googleapis.com" />
-        <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
-        <link href="https://fonts.googleapis.com/css2?family=Amiri&amp;family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;1,400;1,500&amp;family=Plus+Jakarta+Sans:wght@400;500;600;700&amp;display=swap" rel="stylesheet" />
-      </head>
+    <html lang="en" className={`${heading.variable} ${body.variable} ${arabic.variable}`}>
       <body>{children}</body>
     </html>
   );

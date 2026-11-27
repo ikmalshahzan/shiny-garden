@@ -3,12 +3,14 @@ import GardenMotion from '../components/GardenMotion';
 import Pollen from '../components/Pollen';
 import RsvpEnvelope from '../components/RsvpEnvelope';
 
+const portraitGate = '(max-aspect-ratio: 7/10) and (max-width: 759px), (orientation: portrait) and (min-width: 760px) and (max-width: 1100px)';
+
 export default function InvitationPage() {
   return (
     <GardenMotion>
     <div className="garden-backdrop" aria-hidden="true">
-      <img className="landscape motion-layer" src={assetPath('clearing.webp')} width="1440" height="840" alt="" fetchPriority="high" />
-      <img className="aisle-flowers motion-layer" src={assetPath('aisle-flowers.webp')} width="1440" height="840" alt="" />
+      <img className="landscape motion-layer" src={assetPath('clearing.webp')} width="1440" height="840" alt="" decoding="async" />
+      <img className="aisle-flowers motion-layer" src={assetPath('aisle-flowers.webp')} width="1440" height="840" alt="" decoding="async" fetchPriority="low" />
       <Pollen />
     </div>
 
@@ -17,8 +19,14 @@ export default function InvitationPage() {
         <div className="threshold-art" aria-hidden="true">
           {/* Keep the center of the opening at 50% in replacement gate artwork. */}
           <div className="gate-camera motion-layer">
-            <img className="forest-layer motion-layer" src={assetPath('threshold.webp')} width="2044" height="840" alt="" fetchPriority="high" />
-            <img className="arch-layer motion-layer" src={assetPath('floral-arch.webp')} width="2044" height="840" alt="" fetchPriority="high" />
+            <picture className="forest-layer motion-layer">
+              <source media={portraitGate} srcSet={assetPath('threshold-portrait.webp')} />
+              <img src={assetPath('threshold.webp')} width="2044" height="840" alt="" fetchPriority="high" />
+            </picture>
+            <picture className="arch-layer motion-layer">
+              <source media={portraitGate} srcSet={assetPath('floral-arch-portrait.webp')} />
+              <img src={assetPath('floral-arch.webp')} width="2044" height="840" alt="" />
+            </picture>
           </div>
           <div className="foreground left-foliage motion-layer"><img src={assetPath('foliage-left.webp')} width="450" height="840" alt="" /></div>
           <div className="foreground right-foliage motion-layer"><img src={assetPath('foliage-right.webp')} width="450" height="840" alt="" /></div>
